@@ -46,18 +46,18 @@ carbon_burial_model = function(input_parms, method_list){
   parms$gross_sedimentation = calc_gross_sedimentation(parms, method_list)
   parms$resuspension = calc_resuspension(parms, method_list)
   
-  # Linear sedimentation rate, gDW m-2 yr-1
-  parms$lin_sed_rate = parms$gross_sedimentation - parms$resuspension
+  # Sediment density
+  parms$density = calc_sed_om_density(parms, method_list)
+  
+  # Linear sedimentation rate, m yr-1 ; density in g/m3
+  parms$lin_sed_rate = (parms$gross_sedimentation - parms$resuspension)/parms$density
   
   # Percentage organic carbon in the sediment, -
   parms$oc_fraction = calc_oc_fraction(parms, method_list)
   
-  # Sediment density
-  parms$density = calc_sed_om_density(parms, method_list)
-  
   ### Calculate C burial from sedimentation rate and sediment properties
   # gC m-2 yr-1
-  c_burial = parms$lin_sed_rate * parms$oc_fraction # * parms$density
+  c_burial = parms$lin_sed_rate * parms$oc_fraction * parms$density
   
   return(c_burial)
 }
