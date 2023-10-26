@@ -27,9 +27,9 @@ calc_gross_sedimentation = function(parms, method_list){
   if(method_list$gross_sedimentation == "method0"){
     # Assume no decomposition in the water column, only use sinking rates
     sedimentation_alloch = parms$c_in_alloch * parms$c_dw_ratio_in_alloch *
-      parms$sinking_rate_alloch / parms$lake_depth
+      parms$sinking_rate_alloch / parms$mean_depth
     sedimentation_autoch = parms$c_in_autoch * parms$c_dw_ratio_in_autoch *
-      parms$sinking_rate_autoch / parms$lake_depth
+      parms$sinking_rate_autoch / parms$mean_depth
     
     gross_sedimentation = sedimentation_alloch + sedimentation_autoch
   }else{
@@ -53,11 +53,52 @@ calc_resuspension = function(parms, method_list){
 }
 
 calc_oc_fraction = function(parms, method_list){
-  if(method_list$oc_fraction == "method0"){
+  if(method_list$oc_fraction == "method_loi_known"){
     # Calculate from LOI data and Van Bemmelen conversion factor
     oc_fraction = parms$loi_fraction * parms$van_bemmelen_factor
+  }else if(method_list$oc_fraction == "method_hakanson_complex"){
+    # Hakanson, 1995. Ecological modelling, 82, 233-245. doi:10.1016/0304-3800(94)00100-V
+    # Relation fitted for 34 Swedish lakes
+    # High R2 (R2 = 0.83), but complex input requirements
+    # Important: only fitted and valid for "small glacial lakes"
+    
+    # Units: depths in m, areas in km2, catchment_relief: unclear, but is it the
+    # difference between the highest and lowest point in the catchment in m?
+    
+    v_d = 3 * parms$mean_depth / parms$max_depth
+    
+    loi_perc = 50.378 + 0.186 * parms$till_perc + 1.641 * parms$mire_perc^0.7 -
+      9.633 * log10(parms$catchment_area) - 14.104 * log10(parms$catchment_relief) -
+      7.652 * v_d
+    
+    oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
+  }else if(method_list$oc_fraction == "method_hakanson_simple"){
+    # Hakanson, 1995. Ecological modelling, 82, 233-245. doi:10.1016/0304-3800(94)00100-V
+    # Relation fitted for 34 Swedish lakes
+    # Less complex input requirements than "complex" method, but lower R2 (0.65)
+    # Important: only fitted and valid for "small glacial lakes"
+    
+    # Units: depths in m, areas in km2, catchment_relief: unclear, but is it the
+    # difference between the highest and lowest point in the catchment in m?
+    # water_res_time in years
+    
+    depth_rel = (parms$max_depth * sqrt(pi)) / (20 * sqrt(parms$lake_area))
+    
+    loi_perc = 88.374 + 22.588 * log10(parms$lake_area / parms$catchment_area) -
+      19.441 * log10(parms$catchment_relief) + 17.306 * log10(depth_rel) -
+      10.559 * log10(parms$water_res_time)
+    
+    oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
   }else{
     stop("Unknown method!")
+  }
+  
+  if(oc_fraction < 0){
+    warning("OC fraction was calculated to be less than 0; set to 0 instead")
+    oc_fraction = 0.0
+  }else if(oc_fraction > 1){
+    warning("OC fraction was calculated to be higher than 1; set to 1 instead")
+    oc_fraction = 1.0
   }
   
   return(oc_fraction)

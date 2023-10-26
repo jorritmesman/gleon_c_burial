@@ -9,7 +9,7 @@ source("support_script.R")
 # Enter all inputs here. Please give it an intuitive name, and add
 #   units and a description.
 input_parms = list(
-  lake_depth = 8, # m. Mean lake depth
+  mean_depth = 8, # m. Mean lake depth
   time_period = 100, # yr. Time period considered in the model before C is considered "buried"
   c_in_alloch = 1000, # gC m-2 yr-1. External (allochtonous) carbon input from the catchment
   c_dw_ratio_in_alloch = 0.36, # -. Mass fraction of C in allochthonous input
@@ -32,7 +32,7 @@ method_list = list(
   autoch_c_input = "method1",
   gross_sedimentation = "method0",
   resuspension = "method0",
-  oc_fraction = "method0",
+  oc_fraction = "method_loi_known",
   sed_om_density = "method0"
 )
 
