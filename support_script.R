@@ -62,13 +62,14 @@ calc_oc_fraction = function(parms, method_list){
     # High R2 (R2 = 0.83), but complex input requirements
     # Important: only fitted and valid for "small glacial lakes"
     
-    # Units: depths in m, areas in km2, catchment_relief: unclear, but is it the
-    # difference between the highest and lowest point in the catchment in m?
+    # Units: depths in m, areas in km2, catchment_altitude_range: difference
+    # between the highest and lowest point in the catchment in m
     
     v_d = 3 * parms$mean_depth / parms$max_depth
+    rda = parms$catchment_altitude_range / sqrt(parms$catchment_area)
     
     loi_perc = 50.378 + 0.186 * parms$till_perc + 1.641 * parms$mire_perc^0.7 -
-      9.633 * log10(parms$catchment_area) - 14.104 * log10(parms$catchment_relief) -
+      9.633 * log10(parms$catchment_area) - 14.104 * log10(rda) -
       7.652 * v_d
     
     oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
@@ -83,9 +84,10 @@ calc_oc_fraction = function(parms, method_list){
     # water_res_time in years
     
     depth_rel = (parms$max_depth * sqrt(pi)) / (20 * sqrt(parms$lake_area))
+    rda = parms$catchment_altitude_range / sqrt(parms$catchment_area)
     
     loi_perc = 88.374 + 22.588 * log10(parms$lake_area / parms$catchment_area) -
-      19.441 * log10(parms$catchment_relief) + 17.306 * log10(depth_rel) -
+      19.441 * log10(rda) + 17.306 * log10(depth_rel) -
       10.559 * log10(parms$water_res_time)
     
     oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
@@ -96,9 +98,10 @@ calc_oc_fraction = function(parms, method_list){
   if(oc_fraction < 0){
     warning("OC fraction was calculated to be less than 0; set to 0 instead")
     oc_fraction = 0.0
-  }else if(oc_fraction > 1){
-    warning("OC fraction was calculated to be higher than 1; set to 1 instead")
-    oc_fraction = 1.0
+  }else if(oc_fraction > parms$van_bemmelen_factor){
+    warning("OC fraction was calculated to be higher than possible; set to ",
+            parms$van_bemmelen_factor, " instead")
+    oc_fraction = parms$van_bemmelen_factor
   }
   
   return(oc_fraction)
