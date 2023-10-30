@@ -91,6 +91,19 @@ calc_oc_fraction = function(parms, method_list){
       10.559 * log10(parms$water_res_time)
     
     oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
+  }else if(method_list$oc_fraction == "method_downing"){
+    # Downing et al. 2008. Global Biogeochemical Cycles, 22(1), doi:10.1029/2006GB002854
+    # Relation fitted for 40 impoundments in Iowa.
+    
+    # Units: lake and watershed area in km2
+    
+    loi_frac = 0.093 + (0.0096 * parms$lake_area) -
+      (4.2E-5 * parms$catchment_area) +
+      (3.497E-7 * parms$lake_area * parms$catchment_area)
+    
+    # In Downing et al., they use a factor based on local measurements: 0.47 (Dean, 1974)
+    oc_fraction = loi_frac * parms$van_bemmelen_factor
+    
   }else{
     stop("Unknown method!")
   }
