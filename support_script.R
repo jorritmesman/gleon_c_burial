@@ -104,6 +104,23 @@ calc_oc_fraction = function(parms, method_list){
     # In Downing et al., they use a factor based on local measurements: 0.47 (Dean, 1974)
     oc_fraction = loi_frac * parms$van_bemmelen_factor
     
+  }else if(method_list$oc_fraction == "method_hanson_simple"){
+    # Hanson et al. 2004. Global Change Biology, 10(8), doi:10.1111/j.1529-8817.2003.00805.x
+    # Based on equations in Table 1, but simplified, assuming steady state and no
+    # differences between stratified and non-stratified. All POC (dead/alive, epi/hypo)
+    # are assumed to be the same.
+    
+    # Units: poc_conc_water in gC m-2, particle_diamter in um, mean_depth in m
+    # c_s (carbon concentration in sediment) in gC m-2
+    # dry_bulk_density = g cm-3; sed_depth (active sediment depth) in cm
+    
+    s_f = 0.005 # d-1, conversion of POC to DIC in sediments
+    
+    # Carbon concentration in the sediment
+    c_s = (parms$poc_conc_water * 0.0188 * (parms$particle_diameter / 2)^2 / parms$mean_depth * 2) / s_f
+    
+    oc_fraction = c_s / (parms$dry_bulk_density * parms$sed_depth)
+    
   }else{
     stop("Unknown method!")
   }
