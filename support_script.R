@@ -91,6 +91,22 @@ calc_oc_fraction = function(parms, method_list){
       10.559 * log10(parms$water_res_time)
     
     oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
+  }else if (method_list$oc_fraction == "method_hakanson2003"){
+    # Hakanson, 2003. Internat. Rev. Hydrobiol., 88(5), 539-560. doi:10.1002/iroh.200310602
+    # Fitted for 39 Swedish lakes, Hakanson & Peters, 1995
+    # R2 = 0.81
+    # There is an even more complex version (R2 = 0.86), but it has lake colour in it
+    
+    # Units: depths in m, areas in km2
+    depth_rel = (parms$max_depth * sqrt(pi)) / (20 * sqrt(parms$lake_area))
+    
+    x1 = parms$lake_ph
+    x2 = sqrt(parms$catchment_area / parms$lake_area)
+    x3 = depth_rel
+    
+    loi_perc = 114 - 13.4 * x1 - 1.57 * x2 + 2.62 * x3
+    
+    oc_fraction = loi_perc / 100 * parms$van_bemmelen_factor
   }else if(method_list$oc_fraction == "method_downing"){
     # Downing et al. 2008. Global Biogeochemical Cycles, 22(1), doi:10.1029/2006GB002854
     # Relation fitted for 40 impoundments in Iowa.
