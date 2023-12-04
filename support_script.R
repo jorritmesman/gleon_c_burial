@@ -71,6 +71,19 @@ calc_oc_fraction = function(parms, method_list){
     
     oc_fraction = (parms$lin_sed_rate * parms$oc_fraction_water) /
       (parms$sed_mineralisation_rate * parms$active_sed_depth + parms$lin_sed_rate)
+  }else if(method_list$oc_fraction == "santoso2017_sed_profile"){
+    # Santoso et al. (2017). doi:10.1007/s10750-017-3158-7
+    # Equation calculates a profile of OC content in the sediment, and here we
+    # assume that the content at the bottom of the active sediment layer is what
+    # gets buried.
+    # Note: Equation 4 in Santoso et al. probably contains a mistake: it should be
+    #  *z instead of /z
+    # density kg/m3; sed_mineralisation_rate yr-1; active_sed_depth m
+    
+    mass_acc_rate = parms$lin_sed_rate * parms$density
+    
+    oc_fraction = parms$oc_fraction_water * exp((-parms$sed_mineralisation_rate / mass_acc_rate) *
+                                                  parms$active_sed_depth * 100) + parms$sed_nonmeta_c_fraction
   }else{
     stop("Unknown method!")
   }
