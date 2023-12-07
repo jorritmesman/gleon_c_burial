@@ -32,6 +32,41 @@ calc_gross_sedimentation = function(parms, method_list){
       parms$sinking_rate_autoch / parms$mean_depth
     
     gross_sedimentation = sedimentation_alloch + sedimentation_autoch
+  }else if(method_list$gross_sedimentation == "trapping_efficiency"){
+    # Calculate trapping efficiency
+    if(is.null(method_list$trapping_efficiency)){
+      stop("Need to set 'method_list$trapping_efficiency' to use this method!")
+    }
+    
+    # lake_volume in m3, catchment_area in km2, inflow in m3/yr
+    if(method_list$trapping_efficiency == "brown"){
+      par_d = parms$trapping_efficiency_factor
+      
+      trap_eff = 1 - 1 / (1 + 0.0021 * par_d * parms$lake_volume / parms$catchment_area)
+    }else if(method_list$trapping_efficiency == "brune"){
+      alpha = parms$trapping_efficiency_factor
+      res_time = parms$lake_volume / parms$inflow # yr
+      
+      trap_eff = 1 - 0.05 * alpha / sqrt(res_time)
+    }else if(method_list$trapping_efficiency == "siyam"){
+      beta = parms$trapping_efficiency_factor
+      
+      trap_eff = exp(-beta * parms$inflow / parms$lake_volume)
+    }else if(method_list$trapping_efficiency == "jothiprakash"){
+      res_time = parms$lake_volume / parms$inflow # yr
+      
+      trap_eff = (8000 - 36 * res_time^-0.78) /
+        (78.85 + res_time^-0.78)
+      trap_eff = min(1, trap_eff / 100)
+    }else{
+      stop("Unknown method for 'trapping_efficiency'!")
+    }
+    
+    sinking_flux = parms$c_in_alloch / parms$lake_area * trap_eff
+    
+    gross_sedimentation = sinking_flux * exp(-parms$min_rate_pom_water *
+                                               parms$mean_depth /
+                                               parms$sink_vel_pom_water)
   }else{
     stop("Unknown method!")
   }
