@@ -9,17 +9,24 @@ source("support_script.R")
 # Enter all inputs here. Please give it an intuitive name, and add
 #   units and a description.
 input_parms = list(
+  autoch_c_input = 0, # gC m-2 yr-1
+  trapping_efficiency_factor = 0.046, # Meaning depends on method_list$trapping_efficiency
+                                      # See Tan et al. (2019) and sources therein
+  lake_volume = 2E8, # m3
+  catchment_area = 140, # km2
+  lake_area = 2.3E7, # m2
+  inflow = 2.1E7, # m3 yr-1. Inflow discharge
+  c_in_alloch = 2.2E7, # gC yr-1. Allochthonous carbon input
   mean_depth = 8, # m. Mean lake depth
-  time_period = 100, # yr. Time period considered in the model before C is considered "buried"
-  c_in_alloch = 1000, # gC m-2 yr-1. External (allochtonous) carbon input from the catchment
-  c_dw_ratio_in_alloch = 0.36, # -. Mass fraction of C in allochthonous input
-  c_dw_ratio_in_autoch = 0.36, # -. Mass fraction of C in autochtonous input
-  tsi_index = 50, # -. Carlson (1977) trophic state index
-  sinking_rate_alloch = 10, # m yr-1. Sinking rate (in the water column) of allochtonous carbon
-  sinking_rate_autoch = 365, # m yr-1. Sinking rate (in the water column) of autochtonous carbon
-  resusp_fraction = 0.9, # -. A fixed percentage of gross sedimentation rate is resuspended
-  loi_fraction = 0.17, # -. Fraction loss-on-ignition
-  sed_om_density =  1400000, # g/m3. Density of sediment organic matter
+  min_rate_pom_water = 0.01, # d-1. Mineralisation rate of POM in water
+  sink_vel_pom_water = 0.5, # m d-1. Sinking velocity of POM in water
+  resusp_fraction = 0.0, # -. A fixed percentage of gross sedimentation rate is resuspended
+  oc_fraction_water = 0.05, # -. Fraction of OC in sediment, in the water column
+  min_rate_pom_sed = 0.003 * 365, # yr-1. Mineralisation rate of POM in sediment
+  active_sed_depth = 0.1, # m. Active sediment depth. All C below this layer is assumed to be buried. 
+  sed_nonmeta_c_fraction = 0.0, # -. Fraction of non-metabolisable C in the sediment (i.e. always buried)
+  
+  # time_period = 100, # yr. Time period considered in the model before C is considered "buried"
   
   # Universal constants
   van_bemmelen_factor = 0.58 # -. Fraction of C in organic matter 
@@ -29,31 +36,38 @@ input_parms = list(
 #   We can either number them ("method1") or be more specific ("method_with_O2_and_temp"),
 #   or "method_isidorova_2019"
 method_list = list(
-  autoch_c_input = "method1",
-  gross_sedimentation = "method0",
+  autoch_c_input = "method0",
+  gross_sedimentation = "trapping_efficiency",
+  trapping_efficiency = "brown",
   resuspension = "method0",
-  oc_fraction = "method_loi_known",
-  sed_om_density = "method0"
+  oc_fraction = "santoso2017_sed_profile",
+  dbd = "kastowski"
 )
 
 carbon_burial_model = function(input_parms, method_list){
   parms = input_parms
   
-  # Autochtonous carbon production (gC m-2 )
+  # Autochtonous carbon production (gC m-2 yr-1)
   parms$c_in_autoch = calc_c_input_autoch(parms, method_list)
   
   # Gross sedimentation and resuspension rates (gDW m-2 yr-1)
   parms$gross_sedimentation = calc_gross_sedimentation(parms, method_list)
   parms$resuspension = calc_resuspension(parms, method_list)
   
-  # Sediment density
-  parms$density = calc_sed_om_density(parms, method_list)
+  # Net sedimentation (gDW m-2 yr-1)
+  parms$net_sedimentation = parms$gross_sedimentation - parms$resuspension
+  
+  # Density sediment, water column (g m-3)
+  parms$density_water = calc_dbd(parms$oc_fraction_water, method_list)
   
   # Linear sedimentation rate, m yr-1 ; density in g/m3
-  parms$lin_sed_rate = (parms$gross_sedimentation - parms$resuspension)/parms$density
+  parms$lin_sed_rate = parms$net_sedimentation / parms$density_water
   
-  # Percentage organic carbon in the sediment, -
+  # Fraction organic carbon in the sediment, -
   parms$oc_fraction = calc_oc_fraction(parms, method_list)
+  
+  # Density sediment (g m-3)
+  parms$density = calc_dbd(parms$oc_fraction, method_list)
   
   ### Calculate C burial from sedimentation rate and sediment properties
   # gC m-2 yr-1

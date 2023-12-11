@@ -102,10 +102,10 @@ calc_oc_fraction = function(parms, method_list){
     # If we say that dC/dt = 0, OCfraction in the sediment can be calculated as:
     # OCfraction = (LSR * OCfraction_water) / (mineralisation_rate * active_sediment_depth + LSR)
     
-    # Units: lin_sed_rate m yr-1, sed_mineralisation_rate yr-1, active_sed_depth m
+    # Units: lin_sed_rate m yr-1, min_rate_pom_sed yr-1, active_sed_depth m
     
     oc_fraction = (parms$lin_sed_rate * parms$oc_fraction_water) /
-      (parms$sed_mineralisation_rate * parms$active_sed_depth + parms$lin_sed_rate)
+      (parms$min_rate_pom_sed * parms$active_sed_depth + parms$lin_sed_rate)
   }else if(method_list$oc_fraction == "santoso2017_sed_profile"){
     # Santoso et al. (2017). doi:10.1007/s10750-017-3158-7
     # Equation calculates a profile of OC content in the sediment, and here we
@@ -113,11 +113,11 @@ calc_oc_fraction = function(parms, method_list){
     # gets buried.
     # Note: Equation 4 in Santoso et al. probably contains a mistake: it should be
     #  *z instead of /z
-    # density kg/m3; sed_mineralisation_rate yr-1; active_sed_depth m
+    # min_rate_pom_sed yr-1; active_sed_depth m
     
-    mass_acc_rate = parms$lin_sed_rate * parms$density
+    mass_acc_rate = parms$net_sedimentation
     
-    oc_fraction = parms$oc_fraction_water * exp((-parms$sed_mineralisation_rate / mass_acc_rate) *
+    oc_fraction = parms$oc_fraction_water * exp((-parms$min_rate_pom_sed / mass_acc_rate) *
                                                   parms$active_sed_depth * 100) + parms$sed_nonmeta_c_fraction
   }else{
     stop("Unknown method!")
@@ -135,12 +135,23 @@ calc_oc_fraction = function(parms, method_list){
   return(oc_fraction)
 }
 
-calc_sed_om_density = function(parms, method_list){
-  if(method_list$sed_om_density == "method0"){
-    sed_om_density = parms$sed_om_density
+# DBD = Dry Bulk Density, g/m3
+calc_dbd = function(oc_fraction, method_list){
+  if(method_list$dbd == "method0"){
+    dbd = parms$dbd
+  }else if(method_list$dbd == "kastowski"){
+    # Kastowski et al. (2011), doi:10.1029/2010GB003874
+    # Note: the second equation uses a different unit (mg/g instead of %)
+    
+    if(oc_fraction < 0.06){
+      dbd = 1.665*(oc_fraction * 100)^-0.887
+    }else{
+      dbd = 1.776 - 0.363 * log(oc_fraction * 1000)
+    }
   }else{
     stop("Unknown method!")
   }
   
-  return(sed_om_density)
+  # Conversion from g/cm3 to g/m3
+  return(dbd * 1000000)
 }
