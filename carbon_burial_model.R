@@ -45,7 +45,7 @@ method_list = list(
   dbd = "kastowski"
 )
 
-carbon_burial_model = function(input_parms, method_list){
+carbon_burial_model = function(input_parms, method_list, return_efficiency = F){
   parms = input_parms
   
   # Autochtonous carbon production (gC m-2 yr-1)
@@ -77,7 +77,12 @@ carbon_burial_model = function(input_parms, method_list){
   # gC m-2 yr-1
   c_burial = parms$lin_sed_rate * parms$oc_fraction * parms$density
   
-  return(c_burial)
+  if(return_efficiency){
+    return(c_burial / (parms$net_sedimentation * parms$oc_fraction_water))
+  }else{
+    return(c_burial)
+  }
+  
 }
 
 # test_parms = input_parms
