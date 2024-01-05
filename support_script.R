@@ -87,6 +87,18 @@ calc_resuspension = function(parms, method_list){
   return(resuspension)
 }
 
+calc_active_sed_depth = function(parms, method_list){
+  if(method_list$active_sed_depth == "method0"){
+    active_sed_depth = parms$active_sed_depth
+  }else if(method_list$active_sed_depth == "time_and_lsr"){
+    active_sed_depth = parms$lin_sed_rate * parms$year_until_burial
+  }else{
+    stop("Unknown method!")
+  }
+  
+  return(active_sed_depth)
+}
+
 calc_oc_fraction = function(parms, method_list){
   if(method_list$oc_fraction == "method_loi_known"){
     # Calculate from LOI data and Van Bemmelen conversion factor

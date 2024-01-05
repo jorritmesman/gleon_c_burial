@@ -40,6 +40,7 @@ method_list = list(
   gross_sedimentation = "trapping_efficiency",
   trapping_efficiency = "brown",
   resuspension = "method0",
+  active_sed_depth = "method0",
   oc_fraction = "santoso2017_sed_profile",
   dbd = "kastowski"
 )
@@ -62,6 +63,9 @@ carbon_burial_model = function(input_parms, method_list){
   
   # Linear sedimentation rate, m yr-1 ; density in g/m3
   parms$lin_sed_rate = parms$net_sedimentation / parms$density_water
+  
+  # Calculate active sediment depth (m, used in calc_oc_fraction)
+  parms$active_sed_depth = calc_active_sed_depth(parms, method_list)
   
   # Fraction organic carbon in the sediment, -
   parms$oc_fraction = calc_oc_fraction(parms, method_list)
