@@ -24,6 +24,7 @@ input_parms = list(
   oc_fraction_water = 0.05, # -. Fraction of OC in sediment, in the water column
   min_rate_pom_sed = 0.003 * 365, # yr-1. Mineralisation rate of POM in sediment
   active_sed_depth = 0.1, # m. Active sediment depth. All C below this layer is assumed to be buried. 
+  year_until_burial = 15, # yr. Year until sediment is considered "buried"
   sed_nonmeta_c_fraction = 0.0, # -. Fraction of non-metabolisable C in the sediment (i.e. always buried)
   
   # time_period = 100, # yr. Time period considered in the model before C is considered "buried"

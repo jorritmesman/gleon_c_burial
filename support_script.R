@@ -25,11 +25,9 @@ calc_c_input_autoch = function(parms, method_list){
 # gDW m-2 yr-1
 calc_gross_sedimentation = function(parms, method_list){
   if(method_list$gross_sedimentation == "method0"){
-    # Assume no decomposition in the water column, only use sinking rates
-    sedimentation_alloch = parms$c_in_alloch * parms$c_dw_ratio_in_alloch *
-      parms$sinking_rate_alloch / parms$mean_depth
-    sedimentation_autoch = parms$c_in_autoch * parms$c_dw_ratio_in_autoch *
-      parms$sinking_rate_autoch / parms$mean_depth
+    # Assume no decomposition in the water column, everything sedimentates
+    sedimentation_alloch = parms$c_in_alloch / parms$c_dw_ratio_in_alloch
+    sedimentation_autoch = parms$c_in_autoch / parms$c_dw_ratio_in_autoch
     
     gross_sedimentation = sedimentation_alloch + sedimentation_autoch
   }else if(method_list$gross_sedimentation == "trapping_efficiency"){
@@ -62,7 +60,7 @@ calc_gross_sedimentation = function(parms, method_list){
       stop("Unknown method for 'trapping_efficiency'!")
     }
     
-    sinking_flux = parms$c_in_alloch / parms$lake_area * trap_eff
+    sinking_flux = parms$c_in_alloch / parms$oc_fraction_water / parms$lake_area * trap_eff
     
     gross_sedimentation = sinking_flux * exp(-parms$min_rate_pom_water *
                                                parms$mean_depth /
@@ -160,6 +158,9 @@ calc_dbd = function(oc_fraction, method_list){
     }else{
       dbd = 1.776 - 0.363 * log(oc_fraction * 1000)
     }
+  }else if(method_list$dbd == "dean_gorham"){
+    # The first equation from Kastowski, but more stable at high conc. than 2nd
+    dbd = 1.665*(oc_fraction * 100)^-0.887
   }else{
     stop("Unknown method!")
   }
