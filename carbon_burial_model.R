@@ -18,11 +18,11 @@ input_parms = list(
   inflow = 2.1E7, # m3 yr-1. Inflow discharge
   c_in_alloch = 2.2E7, # gC yr-1. Allochthonous carbon input
   mean_depth = 8, # m. Mean lake depth
-  min_rate_pom_water = 0.01, # d-1. Mineralisation rate of POM in water, at 20 degC
+  min_rate_pom_water20 = 0.01, # d-1. Mineralisation rate of POM in water, at 20 degC
   sink_vel_pom_water = 0.5, # m d-1. Sinking velocity of POM in water
   resusp_fraction = 0.0, # -. A fixed percentage of gross sedimentation rate is resuspended
   oc_fraction_water = 0.05, # -. Fraction of OC in sediment, in the water column
-  min_rate_pom_sed = 0.003 * 365, # yr-1. Mineralisation rate of POM in sediment, at 20 degC
+  min_rate_pom_sed20 = 0.003 * 365, # yr-1. Mineralisation rate of POM in sediment, at 20 degC
   active_sed_depth = 0.1, # m. Active sediment depth. All C below this layer is assumed to be buried. 
   year_until_burial = 15, # yr. Year until sediment is considered "buried"
   sed_nonmeta_c_fraction = 0.0, # -. Fraction of non-metabolisable C in the sediment (i.e. always buried)
@@ -54,9 +54,9 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   parms = input_parms
   
   # Temperature-scaling
-  parms$min_rate_pom_water = parms$min_rate_pom_water *
+  parms$min_rate_pom_water = parms$min_rate_pom_water20 *
     parms$min_temp_coef^(parms$lake_water_temp - 20)
-  parms$min_rate_pom_sed = parms$min_rate_pom_sed *
+  parms$min_rate_pom_sed = parms$min_rate_pom_sed20 *
     parms$min_temp_coef^(parms$lake_sed_temp - 20)
   
   # Autochtonous carbon production (gC m-2 yr-1)
