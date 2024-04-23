@@ -23,6 +23,7 @@ calc_c_input_autoch = function(parms, method_list){
   return(c_input_autoch)
 }
 
+#' @export
 # Calculate gross sedimentation rate
 # gDW m-2 yr-1
 calc_gross_sedimentation = function(parms, method_list){
@@ -74,6 +75,7 @@ calc_gross_sedimentation = function(parms, method_list){
   return(gross_sedimentation)
 }
 
+#' @export
 # Calculate resuspension rate
 # gDW m-2 yr-1
 calc_resuspension = function(parms, method_list){
@@ -87,6 +89,8 @@ calc_resuspension = function(parms, method_list){
   return(resuspension)
 }
 
+#' @export
+
 calc_active_sed_depth = function(parms, method_list){
   if(method_list$active_sed_depth == "method0"){
     active_sed_depth = parms$active_sed_depth
@@ -98,6 +102,8 @@ calc_active_sed_depth = function(parms, method_list){
   
   return(active_sed_depth)
 }
+
+#' @export
 
 calc_oc_fraction = function(parms, method_list){
   if(method_list$oc_fraction == "method_loi_known"){
@@ -146,6 +152,8 @@ calc_oc_fraction = function(parms, method_list){
   
   return(oc_fraction)
 }
+
+#' @export
 
 # DBD = Dry Bulk Density, g/m3
 calc_dbd = function(oc_fraction, method_list){
