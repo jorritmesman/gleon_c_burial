@@ -1,4 +1,4 @@
-Package: gleon_c_burial
+Package: gleon.c.burial
 Title: A model to estimate carbon burial in lakes
 Version: 0.1.0
 Authors@R: 
