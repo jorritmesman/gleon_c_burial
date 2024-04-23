@@ -2,10 +2,10 @@ Package: gleon.c.burial
 Title: A model to estimate carbon burial in lakes
 Version: 0.1.0
 Authors@R: 
-    c(person("Jorrit", "Mesman", "jpmesman@gmail.com", role = c("aut", "cre")),
-	  person("Daniela", "Henry", "dhenrypinilla@gmail.com", role = c("aut")),
-	  person("Yike", "Li", "Y.Li@nioo.knaw.nl", role = c("aut")),
-	  person("Ana", "Ayala", "isabel.ayala.zamora@ebc.uu.se", role = c("aut")))
+    c(person("Jorrit", "Mesman", email = "jpmesman@gmail.com", role = c("aut", "cre")),
+	  person("Daniela", "Henry", email = "dhenrypinilla@gmail.com", role = c("aut")),
+	  person("Yike", "Li", email = "Y.Li@nioo.knaw.nl", role = c("aut")),
+	  person("Ana", "Ayala", email = "isabel.ayala.zamora@ebc.uu.se", role = c("aut")))
 Maintainer: Jorrit Mesman <jpmesman@gmail.com>
 Description: Estimates C burial in lakes
 License: GPL-2.0
