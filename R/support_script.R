@@ -1,3 +1,5 @@
+#' @export
+
 # Supporting functions for the carbon_burial_model.R script
 
 # (Nearly) all functions should take the "parms" and "method_list" arguments

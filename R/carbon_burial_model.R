@@ -1,10 +1,15 @@
+#' Estimate carbon burial in lakes
+#'
+#' Run the carbon burial model
+#'
+#' @param input_parms list;
+#' @param method_list list;
+#' @param return_all boolean; 
+#'
+#' @export
+
+
 #### Function to calculate carbon burial in a lake
-
-# Set directory to file location
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
-# Load supporting functions
-source("support_script.R")
 
 # Enter all inputs here. Please give it an intuitive name, and add
 #   units and a description.
