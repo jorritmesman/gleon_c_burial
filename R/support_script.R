@@ -25,12 +25,12 @@ calc_c_input_autoch = function(parms, method_list){
 
 #' @export
 # Calculate gross sedimentation rate
-# gDW m-2 yr-1
+# gC m-2 yr-1
 calc_gross_sedimentation = function(parms, method_list){
   if(method_list$gross_sedimentation == "method0"){
     # Assume no decomposition in the water column, everything sedimentates
-    sedimentation_alloch = parms$c_in_alloch / parms$c_dw_ratio_in_alloch
-    sedimentation_autoch = parms$c_in_autoch / parms$c_dw_ratio_in_autoch
+    sedimentation_alloch = parms$c_in_alloch
+    sedimentation_autoch = parms$c_in_autoch
     
     gross_sedimentation = sedimentation_alloch + sedimentation_autoch
   }else if(method_list$gross_sedimentation == "trapping_efficiency"){
@@ -63,7 +63,7 @@ calc_gross_sedimentation = function(parms, method_list){
       stop("Unknown method for 'trapping_efficiency'!")
     }
     
-    oc_sedimentation = parms$c_in_alloch / parms$oc_fraction_water / parms$lake_area * trap_eff
+    oc_sedimentation = parms$c_in_alloch / parms$lake_area * trap_eff
     
     gross_sedimentation = oc_sedimentation * exp(-parms$min_rate_pom_water *
                                                    parms$mean_depth /

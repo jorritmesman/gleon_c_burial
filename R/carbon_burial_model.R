@@ -20,18 +20,18 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   # Autochtonous carbon production (gC m-2 yr-1)
   parms$c_in_autoch = calc_c_input_autoch(parms, method_list)
   
-  # Gross sedimentation and resuspension rates (gDW m-2 yr-1)
+  # Gross sedimentation and resuspension rates (gC m-2 yr-1)
   parms$gross_sedimentation = calc_gross_sedimentation(parms, method_list)
   parms$resuspension = calc_resuspension(parms, method_list)
   
-  # Net sedimentation (gDW m-2 yr-1)
+  # Net sedimentation (gC m-2 yr-1)
   parms$net_sedimentation = parms$gross_sedimentation - parms$resuspension
   
   # Density sediment, water column (g m-3)
   parms$dbd_water = calc_dbd(parms$oc_fraction_water, method_list)
   
   # Linear sedimentation rate, m yr-1 ; density in g/m3
-  parms$lin_sed_rate = parms$net_sedimentation / parms$dbd_water
+  parms$lin_sed_rate = parms$net_sedimentation / parms$oc_fraction_water / parms$dbd_water
   
   # Calculate active sediment depth (m, used in calc_oc_fraction)
   parms$active_sed_depth = calc_active_sed_depth(parms, method_list)
@@ -39,16 +39,16 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   # Fraction organic carbon in the sediment, -
   parms$oc_fraction = calc_oc_fraction(parms, method_list)
   
-  # Density sediment (g m-3)
-  parms$dbd = calc_dbd(parms$oc_fraction, method_list)
+  # Organic carbon burial efficiency (-)
+  ocbe = parms$oc_fraction / parms$oc_fraction_water
   
-  ### Calculate C burial from sedimentation rate and sediment properties
+  ### Calculate C burial from sedimentation rate and burial efficiency
   # gC m-2 yr-1
-  c_burial = parms$lin_sed_rate * parms$oc_fraction * parms$dbd
+  c_burial = parms$net_sedimentation * ocbe
   
   if(return_all){
     return(c(lsr = parms$lin_sed_rate,
-             ocbe = c_burial / (parms$net_sedimentation * parms$oc_fraction_water),
+             ocbe = ocbe,
              bur = c_burial))
   }else{
     return(c_burial)
