@@ -63,11 +63,11 @@ calc_gross_sedimentation = function(parms, method_list){
       stop("Unknown method for 'trapping_efficiency'!")
     }
     
-    sinking_flux = parms$c_in_alloch / parms$oc_fraction_water / parms$lake_area * trap_eff
+    oc_sedimentation = parms$c_in_alloch / parms$oc_fraction_water / parms$lake_area * trap_eff
     
-    gross_sedimentation = sinking_flux * exp(-parms$min_rate_pom_water *
-                                               parms$mean_depth /
-                                               parms$sink_vel_pom_water)
+    gross_sedimentation = oc_sedimentation * exp(-parms$min_rate_pom_water *
+                                                   parms$mean_depth /
+                                                   parms$sink_vel_pom_water)
   }else{
     stop("Unknown method!")
   }
@@ -171,6 +171,12 @@ calc_dbd = function(oc_fraction, method_list){
   }else if(method_list$dbd == "dean_gorham"){
     # The first equation from Kastowski, but more stable at high conc. than 2nd
     dbd = 1.665*(oc_fraction * 100)^-0.887
+  }else if(method_list$dbd == "keogh"){
+    # Equation 7 from Keogh et al. (2021), doi:10.1029/2021JF006231
+    loi = oc_fraction / parms$van_bemmelen_factor * 100 # in %
+    a_keogh = 2.296
+    b_keogh = 0.139
+    dbd = a_keogh / (1 + a_keogh * b_keogh * loi)
   }else{
     stop("Unknown method!")
   }

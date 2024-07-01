@@ -28,10 +28,10 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   parms$net_sedimentation = parms$gross_sedimentation - parms$resuspension
   
   # Density sediment, water column (g m-3)
-  parms$density_water = calc_dbd(parms$oc_fraction_water, method_list)
+  parms$dbd_water = calc_dbd(parms$oc_fraction_water, method_list)
   
   # Linear sedimentation rate, m yr-1 ; density in g/m3
-  parms$lin_sed_rate = parms$net_sedimentation / parms$density_water
+  parms$lin_sed_rate = parms$net_sedimentation / parms$dbd_water
   
   # Calculate active sediment depth (m, used in calc_oc_fraction)
   parms$active_sed_depth = calc_active_sed_depth(parms, method_list)
@@ -40,15 +40,15 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   parms$oc_fraction = calc_oc_fraction(parms, method_list)
   
   # Density sediment (g m-3)
-  parms$density = calc_dbd(parms$oc_fraction, method_list)
+  parms$dbd = calc_dbd(parms$oc_fraction, method_list)
   
   ### Calculate C burial from sedimentation rate and sediment properties
   # gC m-2 yr-1
-  c_burial = parms$lin_sed_rate * parms$oc_fraction * parms$density
+  c_burial = parms$lin_sed_rate * parms$oc_fraction * parms$dbd
   
   if(return_all){
     return(c(lsr = parms$lin_sed_rate,
-             eff = c_burial / (parms$net_sedimentation * parms$oc_fraction_water),
+             ocbe = c_burial / (parms$net_sedimentation * parms$oc_fraction_water),
              bur = c_burial))
   }else{
     return(c_burial)
@@ -97,7 +97,7 @@ method_list = list(
   resuspension = "method0",
   active_sed_depth = "method0",
   oc_fraction = "santoso2017_sed_profile",
-  dbd = "kastowski"
+  dbd = "keogh"
 )
 
 # test_parms = input_parms
