@@ -156,7 +156,7 @@ calc_oc_fraction = function(parms, method_list){
 #' @export
 
 # DBD = Dry Bulk Density, g/m3
-calc_dbd = function(oc_fraction, method_list){
+calc_dbd = function(oc_fraction, method_list, parms){
   if(method_list$dbd == "method0"){
     dbd = parms$dbd
   }else if(method_list$dbd == "kastowski"){

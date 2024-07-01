@@ -28,7 +28,7 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   parms$net_sedimentation = parms$gross_sedimentation - parms$resuspension
   
   # Density sediment, water column (g m-3)
-  parms$dbd_water = calc_dbd(parms$oc_fraction_water, method_list)
+  parms$dbd_water = calc_dbd(parms$oc_fraction_water, method_list, parms)
   
   # Linear sedimentation rate, m yr-1 ; density in g/m3
   parms$lin_sed_rate = parms$net_sedimentation / parms$oc_fraction_water / parms$dbd_water
