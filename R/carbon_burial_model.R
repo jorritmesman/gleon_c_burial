@@ -84,7 +84,7 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
 #   # time_period = 100, # yr. Time period considered in the model before C is considered "buried"
 #   
 #   # Universal constants
-#   van_bemmelen_factor = 0.58 # -. Fraction of C in organic matter 
+#   c_dw_mass_ratio = 0.5 # -. Fraction of C in organic matter 
 # )
 # 
 # # Add in this list what methods are used in the calculations.

@@ -107,8 +107,8 @@ calc_active_sed_depth = function(parms, method_list){
 
 calc_oc_fraction = function(parms, method_list){
   if(method_list$oc_fraction == "method_loi_known"){
-    # Calculate from LOI data and Van Bemmelen conversion factor
-    oc_fraction = parms$loi_fraction * parms$van_bemmelen_factor
+    # Calculate from LOI data and C:DW mass ratio
+    oc_fraction = parms$loi_fraction * parms$c_dw_mass_ratio
   }else if(method_list$oc_fraction == "mass_balance"){
     # Change in sediment carbon content can be described as:
     # dC/dt = sedimentation - mineralisation - burial (units: mC/yr)
@@ -144,10 +144,10 @@ calc_oc_fraction = function(parms, method_list){
   if(oc_fraction < 0){
     warning("OC fraction was calculated to be less than 0; set to 0 instead")
     oc_fraction = 0.0
-  }else if(oc_fraction > parms$van_bemmelen_factor){
+  }else if(oc_fraction > parms$c_dw_mass_ratio){
     warning("OC fraction was calculated to be higher than possible; set to ",
-            parms$van_bemmelen_factor, " instead")
-    oc_fraction = parms$van_bemmelen_factor
+            parms$c_dw_mass_ratio, " instead")
+    oc_fraction = parms$c_dw_mass_ratio
   }
   
   return(oc_fraction)
@@ -173,7 +173,7 @@ calc_dbd = function(oc_fraction, method_list, parms){
     dbd = 1.665*(oc_fraction * 100)^-0.887
   }else if(method_list$dbd == "keogh"){
     # Equation 7 from Keogh et al. (2021), doi:10.1029/2021JF006231
-    loi = oc_fraction / parms$van_bemmelen_factor * 100 # in %
+    loi = oc_fraction / parms$c_dw_mass_ratio * 100 # in %
     a_keogh = 2.296
     b_keogh = 0.139
     dbd = a_keogh / (1 + a_keogh * b_keogh * loi)
