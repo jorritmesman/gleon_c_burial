@@ -12,10 +12,17 @@ calc_c_input_autoch = function(parms, method_list){
   if(method_list$autoch_c_input == "method0"){
     # Constant, provided as input
     c_input_autoch = parms$autoch_c_input
-  }else if(method_list$autoch_c_input == "method1"){
-    # Calculate based on Carlson Trophic State Index
-    ### DUMMY RELATIONSHIP, for testing only! ###
-    c_input_autoch = parms$tsi_index * 20
+  }else if(method_list$autoch_c_input == "hanson2008"){
+    # Hanson et al. 2008. doi:10.1111/j.1365-2486.2004.00805.x
+    # Assume a relationship between TP and GPP and that GPP controls
+    # the autochthonous C input into the lake
+    gpp = exp(0.883 * log(parms$tp)) # mmolC/m3/d
+    
+    # This is assumed to only happen in the epilimnion
+    c_produced = gpp * min(parms$mean_depth, parms$epilim_depth, na.rm = T) # mmolC/m2/d
+    
+    # Convert to gC m-2 yr-1
+    c_input_autoch = c_produced * 12.01 / 1000 * 365
   }else{
     stop("Unknown method!")
   }
@@ -29,10 +36,10 @@ calc_c_input_autoch = function(parms, method_list){
 calc_gross_sedimentation = function(parms, method_list){
   if(method_list$gross_sedimentation == "method0"){
     # Assume no decomposition in the water column, everything sedimentates
-    sedimentation_alloch = parms$c_in_alloch
-    sedimentation_autoch = parms$c_in_autoch
+    alloch_sedimentation = parms$c_in_alloch / parms$lake_area
+    autoch_sedimentation = parms$c_in_autoch
     
-    gross_sedimentation = sedimentation_alloch + sedimentation_autoch
+    gross_sedimentation = c(alloch = sedimentation_alloch, autoch = sedimentation_autoch)
   }else if(method_list$gross_sedimentation == "trapping_efficiency"){
     # Calculate trapping efficiency
     if(is.null(method_list$trapping_efficiency)){
@@ -63,11 +70,15 @@ calc_gross_sedimentation = function(parms, method_list){
       stop("Unknown method for 'trapping_efficiency'!")
     }
     
-    oc_sedimentation = parms$c_in_alloch / parms$lake_area * trap_eff
+    alloch_oc_sedimentation_flux = parms$c_in_alloch / parms$lake_area * trap_eff
     
-    gross_sedimentation = oc_sedimentation * exp(-parms$min_rate_pom_water *
-                                                   parms$mean_depth /
-                                                   parms$sink_vel_pom_water)
+    alloch_sedimentation = alloch_oc_sedimentation_flux * exp(-parms$min_rate_pom_alloch_water20 *
+                                                                parms$mean_depth /
+                                                                parms$sink_vel_pom_water)
+    autoch_sedimentation = parms$c_in_autoch * exp(-parms$min_rate_pom_autoch_water20 *
+                                                     parms$mean_depth /
+                                                     parms$sink_vel_pom_water)
+    gross_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation)
   }else{
     stop("Unknown method!")
   }
@@ -137,6 +148,20 @@ calc_oc_fraction = function(parms, method_list){
     
     oc_fraction = parms$oc_fraction_water * exp((-parms$min_rate_pom_sed / mass_acc_rate) *
                                                   parms$active_sed_depth * 100) + parms$sed_nonmeta_c_fraction
+  }else if(method_list$oc_fraction == "mass_balance2"){
+    # Mass balance similar to the aquatic flux
+    
+    flux_alloch_top = parms$net_sedimentation[["alloch"]]
+    flux_alloch_bottom = flux_alloch_top * exp(-parms$min_rate_pom_alloch_sed *
+                                                 parms$active_sed_depth /
+                                                 parms$lin_sed_rate[["alloch"]])
+    
+    flux_autoch_top = parms$net_sedimentation[["autoch"]]
+    flux_autoch_bottom = flux_autoch_top * exp(-parms$min_rate_pom_autoch_sed *
+                                                 parms$active_sed_depth /
+                                                 parms$lin_sed_rate[["autoch"]])
+    
+    oc_fraction = parms$oc_fraction_water * (flux_alloch_bottom / flux_alloch_top)
   }else{
     stop("Unknown method!")
   }
@@ -156,24 +181,24 @@ calc_oc_fraction = function(parms, method_list){
 #' @export
 
 # DBD = Dry Bulk Density, g/m3
-calc_dbd = function(oc_fraction, method_list, parms){
+calc_dbd = function(parms, method_list){
   if(method_list$dbd == "method0"){
     dbd = parms$dbd
   }else if(method_list$dbd == "kastowski"){
     # Kastowski et al. (2011), doi:10.1029/2010GB003874
     # Note: the second equation uses a different unit (mg/g instead of %)
     
-    if(oc_fraction < 0.06){
-      dbd = 1.665*(oc_fraction * 100)^-0.887
+    if(parms$oc_fraction < 0.06){
+      dbd = 1.665*(parms$oc_fraction * 100)^-0.887
     }else{
-      dbd = 1.776 - 0.363 * log(oc_fraction * 1000)
+      dbd = 1.776 - 0.363 * log(parms$oc_fraction * 1000)
     }
   }else if(method_list$dbd == "dean_gorham"){
     # The first equation from Kastowski, but more stable at high conc. than 2nd
-    dbd = 1.665*(oc_fraction * 100)^-0.887
+    dbd = 1.665*(parms$oc_fraction * 100)^-0.887
   }else if(method_list$dbd == "keogh"){
     # Equation 7 from Keogh et al. (2021), doi:10.1029/2021JF006231
-    loi = oc_fraction / parms$c_dw_mass_ratio * 100 # in %
+    loi = parms$oc_fraction / parms$c_dw_mass_ratio * 100 # in %
     a_keogh = 2.296
     b_keogh = 0.139
     dbd = a_keogh / (1 + a_keogh * b_keogh * loi)
