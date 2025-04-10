@@ -72,10 +72,10 @@ calc_gross_sedimentation = function(parms, method_list){
     
     alloch_oc_sedimentation_flux = parms$c_in_alloch / parms$lake_area * trap_eff
     
-    alloch_sedimentation = alloch_oc_sedimentation_flux * exp(-parms$min_rate_pom_alloch_water20 *
+    alloch_sedimentation = alloch_oc_sedimentation_flux * exp(-parms$min_rate_pom_alloch_water *
                                                                 parms$mean_depth /
                                                                 parms$sink_vel_pom_water)
-    autoch_sedimentation = parms$c_in_autoch * exp(-parms$min_rate_pom_autoch_water20 *
+    autoch_sedimentation = parms$c_in_autoch * exp(-parms$min_rate_pom_autoch_water *
                                                      parms$mean_depth /
                                                      parms$sink_vel_pom_water)
     gross_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation)
