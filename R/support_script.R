@@ -38,8 +38,11 @@ calc_net_sedimentation = function(parms, method_list){
     # Assume no decomposition in the water column, everything sedimentates
     alloch_sedimentation = parms$c_in_alloch / parms$lake_area
     autoch_sedimentation = parms$c_in_autoch
+    other_sedimentation = (1 - parms$oc_fraction_inflow) / parms$oc_fraction_inflow * alloch_sedimentation +
+      (1 - parms$c_dw_mass_ratio) / parms$c_dw_mass_ratio * autoch_sedimentation
+    # Other = other_alloch + other_autoch
     
-    net_sedimentation = c(alloch = sedimentation_alloch, autoch = sedimentation_autoch)
+    net_sedimentation = c(alloch = sedimentation_alloch, autoch = sedimentation_autoch, other = other_sedimentation)
   }else if(method_list$net_sedimentation == "trapping_efficiency"){
     # Calculate trapping efficiency
     if(is.null(method_list$trapping_efficiency)){
@@ -78,7 +81,11 @@ calc_net_sedimentation = function(parms, method_list){
     autoch_sedimentation = parms$c_in_autoch * exp(-parms$min_rate_pom_autoch_water *
                                                      parms$mean_depth /
                                                      parms$sink_vel_pom_water)
-    net_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation)
+    other_sedimentation = (1 - parms$oc_fraction_inflow) / parms$oc_fraction_inflow * alloch_oc_sedimentation_flux +
+      (1 - parms$c_dw_mass_ratio) / parms$c_dw_mass_ratio * autoch_sedimentation
+    # Other = other_alloch + other_autoch
+    
+    net_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation, other = other_sedimentation)
   }else{
     stop("Unknown method!")
   }
@@ -120,7 +127,7 @@ calc_oc_fraction = function(parms, method_list){
     
     # Units: lin_sed_rate m yr-1, min_rate_pom_sed yr-1, active_sed_depth m
     
-    oc_fraction = (parms$lin_sed_rate * parms$oc_fraction_water) /
+    oc_fraction = (parms$lin_sed_rate * parms$oc_fraction) /
       (parms$min_rate_pom_sed * parms$active_sed_depth + parms$lin_sed_rate)
   }else if(method_list$oc_fraction == "santoso2017_sed_profile"){
     # Santoso et al. (2017). doi:10.1007/s10750-017-3158-7
@@ -137,29 +144,34 @@ calc_oc_fraction = function(parms, method_list){
                                                   parms$active_sed_depth * 100) + parms$sed_nonmeta_c_fraction
   }else if(method_list$oc_fraction == "mass_balance2"){
     # Mass balance similar to the aquatic flux
-    
     flux_alloch_top = parms$net_sedimentation[["alloch"]]
     flux_alloch_bottom = flux_alloch_top * exp(-parms$min_rate_pom_alloch_sed *
                                                  parms$active_sed_depth /
-                                                 parms$lin_sed_rate[["alloch"]])
+                                                 parms$lin_sed_rate)
     
     flux_autoch_top = parms$net_sedimentation[["autoch"]]
     flux_autoch_bottom = flux_autoch_top * exp(-parms$min_rate_pom_autoch_sed *
                                                  parms$active_sed_depth /
-                                                 parms$lin_sed_rate[["autoch"]])
+                                                 parms$lin_sed_rate)
     
-    oc_fraction = parms$oc_fraction_water * (flux_alloch_bottom / flux_alloch_top)
+    oc_fraction_alloch = flux_alloch_bottom / sum(parms$net_sedimentation)
+    oc_fraction_autoch = flux_autoch_bottom / sum(parms$net_sedimentation)
+    
+    oc_fraction = c(alloch = oc_fraction_alloch, autoch = oc_fraction_autoch,
+                    all = oc_fraction_alloch + oc_fraction_autoch)
   }else{
     stop("Unknown method!")
   }
   
-  if(oc_fraction < 0){
-    warning("OC fraction was calculated to be less than 0; set to 0 instead")
-    oc_fraction = 0.0
-  }else if(oc_fraction > parms$c_dw_mass_ratio){
-    warning("OC fraction was calculated to be higher than possible; set to ",
-            parms$c_dw_mass_ratio, " instead")
-    oc_fraction = parms$c_dw_mass_ratio
+  if(length(oc_fraction) == 1L){
+    if(oc_fraction < 0){
+      warning("OC fraction was calculated to be less than 0; set to 0 instead")
+      oc_fraction = 0.0
+    }else if(oc_fraction > parms$c_dw_mass_ratio){
+      warning("OC fraction was calculated to be higher than possible; set to ",
+              parms$c_dw_mass_ratio, " instead")
+      oc_fraction = parms$c_dw_mass_ratio
+    }
   }
   
   return(oc_fraction)
