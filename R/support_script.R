@@ -12,11 +12,23 @@ calc_c_input_autoch = function(parms, method_list){
   if(method_list$autoch_c_input == "method0"){
     # Constant, provided as input
     c_input_autoch = parms$autoch_c_input
-  }else if(method_list$autoch_c_input == "hanson2008"){
+  }else if(method_list$autoch_c_input == "hanson2008" | method_list$autoch_c_input == "hanson2008_vollenweider"){
     # Hanson et al. 2008. doi:10.1111/j.1365-2486.2004.00805.x
     # Assume a relationship between TP and GPP and that GPP controls
     # the autochthonous C input into the lake
-    gpp = exp(0.883 * log(parms$tp)) # mmolC/m3/d
+    
+    if(method_list$autoch_c_input == "hanson2008_vollenweider"){
+      res_time = parms$lake_volume / parms$inflow  # yr
+      
+      # Maavara et al. 2015. doi:10.1073/pnas.1511797112
+      Rp = 1 - 1 / (1 + 0.801 * res_time)
+      
+      # Vollenweider, 1975. doi:10.1007/BF02505178
+      TP = parms$p_inflow * (1 - Rp) / parms$inflow * 1000 # mg/m3 (p_inflow in g/yr)
+    }else{
+      TP = parms$tp
+    }
+    gpp = exp(0.883 * log(TP)) # mmolC/m3/d
     
     # This is assumed to only happen in the epilimnion
     c_produced = gpp * min(parms$mean_depth, parms$epilim_depth, na.rm = T) # mmolC/m2/d
