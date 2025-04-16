@@ -24,12 +24,8 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
   # Autochtonous carbon production (gC m-2 yr-1)
   parms$c_in_autoch = calc_c_input_autoch(parms, method_list)
   
-  # Gross sedimentation and resuspension rates (gC m-2 yr-1)
-  parms$gross_sedimentation = calc_gross_sedimentation(parms, method_list)
-  parms$resuspension = calc_resuspension(parms, method_list)
-  
   # Net sedimentation (gC m-2 yr-1)
-  parms$net_sedimentation = parms$gross_sedimentation - parms$resuspension
+  parms$net_sedimentation = calc_net_sedimentation(parms, method_list)
   
   # Density sediment, water column (g m-3)
   parms$dbd_water = calc_dbd(parms, method_list)
@@ -77,7 +73,6 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
 #   min_rate_pom_alloch_water20 = 0.01, # d-1. Mineralisation rate of allochthoous POM in water, at 20 degC
 #   min_rate_pom_autoch_water20 = 0.1, # d-1. Mineralisation rate of autochthonous POM in water, at 20 degC
 #   sink_vel_pom_water = 0.5, # m d-1. Sinking velocity of POM in water
-#   resusp_fraction = 0.0, # -. A fixed percentage of gross sedimentation rate is resuspended
 #   oc_fraction_water = 0.05, # -. Fraction of OC in sediment, in the water column
 #   min_rate_pom_alloch_sed20 = 0.003 * 365, # yr-1. Mineralisation rate of allochthonous POM in sediment, at 20 degC
 #   min_rate_pom_autoch_sed20 = 0.03 * 365, # yr-1. Mineralisation rate of autochthonous POM in sediment, at 20 degC
@@ -100,9 +95,8 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
 # #   or "method_isidorova_2019"
 # method_list = list(
 #   autoch_c_input = "hanson2008",
-#   gross_sedimentation = "trapping_efficiency",
+#   net_sedimentation = "trapping_efficiency",
 #   trapping_efficiency = "brown",
-#   resuspension = "method0",
 #   active_sed_depth = "method0",
 #   oc_fraction = "mass_balance2", # "santoso2017_sed_profile",
 #   dbd = "keogh"

@@ -31,16 +31,16 @@ calc_c_input_autoch = function(parms, method_list){
 }
 
 #' @export
-# Calculate gross sedimentation rate
+# Calculate net sedimentation rate
 # gC m-2 yr-1
-calc_gross_sedimentation = function(parms, method_list){
-  if(method_list$gross_sedimentation == "method0"){
+calc_net_sedimentation = function(parms, method_list){
+  if(method_list$net_sedimentation == "method0"){
     # Assume no decomposition in the water column, everything sedimentates
     alloch_sedimentation = parms$c_in_alloch / parms$lake_area
     autoch_sedimentation = parms$c_in_autoch
     
-    gross_sedimentation = c(alloch = sedimentation_alloch, autoch = sedimentation_autoch)
-  }else if(method_list$gross_sedimentation == "trapping_efficiency"){
+    net_sedimentation = c(alloch = sedimentation_alloch, autoch = sedimentation_autoch)
+  }else if(method_list$net_sedimentation == "trapping_efficiency"){
     # Calculate trapping efficiency
     if(is.null(method_list$trapping_efficiency)){
       stop("Need to set 'method_list$trapping_efficiency' to use this method!")
@@ -78,27 +78,14 @@ calc_gross_sedimentation = function(parms, method_list){
     autoch_sedimentation = parms$c_in_autoch * exp(-parms$min_rate_pom_autoch_water *
                                                      parms$mean_depth /
                                                      parms$sink_vel_pom_water)
-    gross_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation)
+    net_sedimentation = c(alloch = alloch_sedimentation, autoch = autoch_sedimentation)
   }else{
     stop("Unknown method!")
   }
   
-  return(gross_sedimentation)
+  return(net_sedimentation)
 }
 
-#' @export
-# Calculate resuspension rate
-# gDW m-2 yr-1
-calc_resuspension = function(parms, method_list){
-  if(method_list$resuspension == "method0"){
-    # Assume that a fixed percentage of the gross sedimentation rate is resuspended
-    resuspension = parms$gross_sedimentation * parms$resusp_fraction
-  }else{
-    stop("Unknown method!")
-  }
-  
-  return(resuspension)
-}
 
 #' @export
 
