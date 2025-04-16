@@ -99,13 +99,13 @@ carbon_burial_model = function(input_parms, method_list, return_all = F){
 #   oc_fraction = "mass_balance2", # "santoso2017_sed_profile",
 #   dbd = "keogh"
 # )
-
+# 
 # test_parms = input_parms
-# test_parms$c_in_alloch = 1000
+# test_parms$c_in_alloch = 1E7
 # carbon_burial_model(test_parms, method_list)
-# test_parms$c_in_alloch = 1500
+# test_parms$c_in_alloch = 1E8
 # carbon_burial_model(test_parms, method_list)
-# test_parms$tsi_index = 20
+# test_parms$tp = 80
 # carbon_burial_model(test_parms, method_list)
-# test_parms$lake_depth = 30
+# test_parms$mean_depth = 20
 # carbon_burial_model(test_parms, method_list)
